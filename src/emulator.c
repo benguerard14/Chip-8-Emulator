@@ -76,58 +76,59 @@ void display_instruction(instruction ins) {
   display();
 }
 
-void arithmetic_instruction(unsigned char flag, unsigned char *X, unsigned char *Y){
-  switch(flag){
-    //0 -> X = Y
-    case(0x0):
+void arithmetic_instruction(unsigned char flag, unsigned char *X,
+                            unsigned char *Y) {
+  switch (flag) {
+  // 0 -> X = Y
+  case (0x0):
+    *X = *Y;
+    break;
+  // 1 -> X \= Y
+  case (0x1):
+    *X |= *Y;
+    break;
+  // 1 -> X &= Y
+  case (0x2):
+    *X &= *Y;
+    break;
+  // 1 -> X ^= Y
+  case (0x3):
+    *X ^= *Y;
+    break;
+  // 1 -> X += Y
+  case (0x4):
+    *X += *Y;
+    break;
+  // 1 -> X -= Y
+  case (0x5):
+    *X -= *Y;
+    emulator.VF = (*X > 0) ? 1 : 0;
+    break;
+  // Shift to the right. If shift_old, VX = VY
+  case (0x6):
+    if (shift_old) {
       *X = *Y;
-      break;
-    //1 -> X \= Y
-    case(0x1):
-      *X |= *Y;
-      break;
-    //1 -> X &= Y
-    case(0x2):
-      *X &= *Y;
-      break;
-    //1 -> X ^= Y
-    case(0x3):
-      *X ^= *Y;
-      break;
-    //1 -> X += Y
-    case(0x4):
-      *X += *Y;
-      break;
-    //1 -> X -= Y
-    case(0x5):
-      *X -= *Y;
-      emulator.VF = (*X > 0) ? 1 : 0;
-      break;
-    //Shift to the right. If shift_old, VX = VY
-    case(0x6):
-      if(shift_old){
-        *X = *Y;
-      }
-      emulator.VF = (*X & 0x1) ? 1 : 0;
-      *X = *X >> 1;
-      break;
-    //1 -> X = Y -X
-    case(0x7):
-      *X = (*Y - *X);
-      emulator.VF = (*X > 0) ? 1 : 0;
-      break;
-    //dont know yet
-    //Shift to the right. If shift_old, VX = VY
-    case(0xE):
-      if(shift_old){
-        *X = *Y;
-      }
-      emulator.VF = (*X & 0b10000000) ? 1 : 0;
-      *X = *X << 1;
-      break;
-    default:
-      printf("ERROR: Unknown Arithmetical Instruction %d\n", flag);
-      exit(-1);
+    }
+    emulator.VF = (*X & 0x1) ? 1 : 0;
+    *X = *X >> 1;
+    break;
+  // 1 -> X = Y -X
+  case (0x7):
+    *X = (*Y - *X);
+    emulator.VF = (*X > 0) ? 1 : 0;
+    break;
+  // dont know yet
+  // Shift to the right. If shift_old, VX = VY
+  case (0xE):
+    if (shift_old) {
+      *X = *Y;
+    }
+    emulator.VF = (*X & 0b10000000) ? 1 : 0;
+    *X = *X << 1;
+    break;
+  default:
+    printf("ERROR: Unknown Arithmetical Instruction %d\n", flag);
+    exit(-1);
   }
 }
 
@@ -151,8 +152,7 @@ short *emulator_fetch() {
 }
 
 void emulator_decode(instruction instruction_t) {
-  if (instruction_t.F == 0 | instruction_t.F == 2)
-    printf("%04X\n", *((unsigned short *)&instruction_t));
+  printf("%04X\n", *((unsigned short *)&instruction_t));
   unsigned char *reg_ptr;
   unsigned char *reg2_ptr;
   switch (instruction_t.F) {
@@ -225,6 +225,9 @@ void emulator_decode(instruction instruction_t) {
   case 0xA:
     emulator.I =
         (instruction_t.X << 8) | (instruction_t.Y << 4) | instruction_t.N;
+    break;
+  case 0xB:
+
     break;
   // DXYN -> NO idea
   case 0xD:

@@ -9,7 +9,6 @@ void loop() {
 
     emulator_decode(*instruction_ptr);
     i++;
-    graphics_sleep(100);
   }
 }
 
