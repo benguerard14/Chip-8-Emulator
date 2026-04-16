@@ -9,6 +9,8 @@
 static CHIP_8 emulator;
 static short current_instruction;
 
+char shift_old = 0;
+
 char *get_string_file(char *file) {
   static char buff[PROGRAM_SIZE];
   FILE *f = fopen(file, "rb"); // "rb" not "r"
@@ -72,6 +74,61 @@ void display_instruction(instruction ins) {
   }
 
   display();
+}
+
+void arithmetic_instruction(unsigned char flag, unsigned char *X, unsigned char *Y){
+  switch(flag){
+    //0 -> X = Y
+    case(0x0):
+      *X = *Y;
+      break;
+    //1 -> X \= Y
+    case(0x1):
+      *X |= *Y;
+      break;
+    //1 -> X &= Y
+    case(0x2):
+      *X &= *Y;
+      break;
+    //1 -> X ^= Y
+    case(0x3):
+      *X ^= *Y;
+      break;
+    //1 -> X += Y
+    case(0x4):
+      *X += *Y;
+      break;
+    //1 -> X -= Y
+    case(0x5):
+      *X -= *Y;
+      emulator.VF = (*X > 0) ? 1 : 0;
+      break;
+    //Shift to the right. If shift_old, VX = VY
+    case(0x6):
+      if(shift_old){
+        *X = *Y;
+      }
+      emulator.VF = (*X & 0x1) ? 1 : 0;
+      *X = *X >> 1;
+      break;
+    //1 -> X = Y -X
+    case(0x7):
+      *X = (*Y - *X);
+      emulator.VF = (*X > 0) ? 1 : 0;
+      break;
+    //dont know yet
+    //Shift to the right. If shift_old, VX = VY
+    case(0xE):
+      if(shift_old){
+        *X = *Y;
+      }
+      emulator.VF = (*X & 0b10000000) ? 1 : 0;
+      *X = *X << 1;
+      break;
+    default:
+      printf("ERROR: Unknown Arithmetical Instruction %d\n", flag);
+      exit(-1);
+  }
 }
 
 void set_pc(instruction instruction_t) {
@@ -151,6 +208,11 @@ void emulator_decode(instruction instruction_t) {
     *reg_ptr += (instruction_t.Y << 4) | instruction_t.N;
     break;
   // 9XY0 -> SKIP 1 if *X != *Y
+  case 0x8:
+    reg_ptr = &emulator.V0 + instruction_t.X;
+    reg2_ptr = &emulator.V0 + instruction_t.Y;
+    arithmetic_instruction(instruction_t.N, reg_ptr, reg2_ptr);
+    break;
   case 0x9:
     reg_ptr = &emulator.V0 + instruction_t.X;
     reg2_ptr = &emulator.V0 + instruction_t.Y;

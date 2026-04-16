@@ -4,7 +4,7 @@
 
 void loop() {
   int i = 0;
-  while (i < 100) {
+  while (i < 300) {
     instruction *instruction_ptr = (instruction *)emulator_fetch();
 
     emulator_decode(*instruction_ptr);
