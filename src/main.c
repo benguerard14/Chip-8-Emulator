@@ -4,11 +4,12 @@
 
 void loop() {
   int i = 0;
-  while (i < 100000) {
+  while (i < 100) {
     instruction *instruction_ptr = (instruction *)emulator_fetch();
 
     emulator_decode(*instruction_ptr);
     i++;
+    graphics_sleep(100);
   }
 }
 

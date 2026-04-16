@@ -22,11 +22,6 @@ char *get_string_file(char *file) {
     printf("Nothing in file!\n");
     exit(-1);
   }
-  printf("Read %zu bytes\n", n);
-  printf("First 16 bytes: ");
-  for (int i = 0; i < 16; i++)
-    printf("%02X ", (unsigned char)buff[i]);
-  printf("\n");
   return buff;
 }
 
@@ -99,7 +94,8 @@ short *emulator_fetch() {
 }
 
 void emulator_decode(instruction instruction_t) {
-  printf("%d\n", *((short *)&instruction_t));
+  if (instruction_t.F == 0 | instruction_t.F == 2)
+    printf("%04X\n", *((unsigned short *)&instruction_t));
   unsigned char *reg_ptr;
   unsigned char *reg2_ptr;
   switch (instruction_t.F) {
@@ -118,8 +114,8 @@ void emulator_decode(instruction instruction_t) {
     break;
   // 0x2NNN -> PC = NNN; + push to stack
   case 0x2:
-    set_pc(instruction_t);
     push(&emulator.stk, emulator.PC);
+    set_pc(instruction_t);
     break;
   // 0x3XNN -> skip 1 instruction if *X = NN
   case 0x3:
