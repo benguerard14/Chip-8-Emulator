@@ -4,6 +4,7 @@
 #include "stack.h"
 
 #define PROGRAM_SIZE 3584
+#define FONT_ADDRESS 0x50
 
 typedef struct {
   unsigned char RAM[4096];

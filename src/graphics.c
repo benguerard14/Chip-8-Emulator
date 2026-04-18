@@ -68,6 +68,7 @@ int graphics_update() {
     }
   }
   SDL_BlitSurface(new_surface, NULL, window_surface, NULL);
+  SDL_FreeSurface(new_surface);
   SDL_UpdateWindowSurface(window);
   return 0;
 }
